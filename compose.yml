@@ -1,0 +1,41 @@
+services:
+  darthvader:
+    build: dnsserver
+    hostname: darthvader
+    networks:
+      rededns:
+          ipv4_address: 192.168.20.10
+    volumes:
+      - ./dnsserver/conf/primario/named.conf.options:/etc/bind/named.conf.options
+      - ./dnsserver/conf/primario/named.conf.local:/etc/bind/named.conf.local
+      - ./dnsserver/conf/primario/db.starwars.lan:/etc/bind/db.starwars.lan
+      - ./dnsserver/conf/primario/db.20.168.192:/etc/bind/db.20.168.192
+      # /etc/bind/db.starwars.lan
+# Esto de arriba primero se descarga, luego se monta el volumen. Eso pq docker siempre piensa que lo de la izq es una cpta
+
+  darthsidious:
+    build: dnsserver
+    hostname: darthsidious
+    networks:
+      rededns:
+          ipv4_address: 192.168.20.12
+    volumes:
+      - ./dnsserver/conf/primario/named.conf.options:/etc/bind/named.conf.options
+      - ./dnsserver/conf/secundario/named.conf.local:/etc/bind/named.conf.local
+#      - ./darthvader/conf/db.starwars.lan:/etc/bind/db.starwars.lan
+#      - ./darthvader/conf/db.20.168.192:/etc/bind/db.20.168.192
+  eq1:
+    build: debian
+    hostname: eq1
+    dns:
+      - 192.168.20.10
+      - 192.168.20.11 # aquí tendrá que ser la de el secundario , ahora es la 12. Puedes volv a poner 11 en todos achs.
+    networks:
+      rededns:
+          ipv4_address: 192.168.20.100
+networks:
+  rededns:
+    ipam:
+      config:
+        - subnet: 192.168.20.0/24
+
